@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Level Access Request Result - Coral Facility App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #0a3d4a 0%, #1a6b7c 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    .icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+
+    .icon.success {
+      background: #10b981;
+      color: white;
+    }
+
+    .icon.error {
+      background: #ef4444;
+      color: white;
+    }
+
+    .icon.pending {
+      background: #f59e0b;
+      color: white;
+    }
+
+    h1 {
+      color: #0a3d4a;
+      margin-bottom: 1rem;
+      font-size: 1.875rem;
+      font-weight: 700;
+    }
+
+    .message {
+      color: #64748b;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .details {
+      background: #f8fafc;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .detail-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .detail-label {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .detail-value {
+      color: #0a3d4a;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #0a3d4a;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #083040;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #0a3d4a;
+    }
+
+    .btn-secondary:hover {
+      background: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .footer {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e2e8f0;
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+
+    .error-details {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 1rem;
+      color: #dc2626;
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 2rem 1.5rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="icon" class="icon">
+      <span id="icon-symbol">?</span>
+    </div>
+
+    <h1 id="title">Processing Request...</h1>
+    
+    <div id="message" class="message">
+      Please wait while we process your request.
+    </div>
+
+    <div id="details" class="details" style="display: none;">
+      <div class="detail-row">
+        <span class="detail-label">Request ID:</span>
+        <span id="request-id" class="detail-value">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Email:</span>
+        <span id="email" class="detail-value">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Level:</span>
+        <span id="level" class="detail-value">-</span>
+      </div>
+    </div>
+
+    <div id="error-details" class="error-details" style="display: none;">
+      <strong>Error Details:</strong>
+      <div id="error-message">-</div>
+    </div>
+
+    <div id="actions" class="actions">
+      <a href="https://jessicanasica.github.io/coral-facility-app/download.html" class="btn btn-primary">
+        Download App
+      </a>
+      <a href="mailto:jessicanasica@gmail.com" class="btn btn-secondary">
+        Contact Support
+      </a>
+    </div>
+
+    <div class="footer">
+      <p>&copy; 2026 Coral Facility App. All rights reserved.</p>
+    </div>
+  </div>
+
+  <script>
+    // Parse URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status') || 'error';
+    const requestId = urlParams.get('id') || '-';
+    const email = urlParams.get('email') || '-';
+    const level = urlParams.get('level') || '-';
+    const error = urlParams.get('error') || '';
+
+    // Update page based on status
+    const icon = document.getElementById('icon');
+    const iconSymbol = document.getElementById('icon-symbol');
+    const title = document.getElementById('title');
+    const message = document.getElementById('message');
+    const details = document.getElementById('details');
+    const errorDetails = document.getElementById('error-details');
+
+    // Set details
+    document.getElementById('request-id').textContent = requestId;
+    document.getElementById('email').textContent = email;
+    document.getElementById('level').textContent = level;
+
+    switch (status) {
+      case 'approved':
+        icon.className = 'icon success';
+        iconSymbol.textContent = '✓';
+        title.textContent = 'Access Approved!';
+        message.textContent = 'Your level access request has been approved. You now have elevated privileges in the Coral Facility App. Please log out and log back in for the changes to take effect.';
+        details.style.display = 'block';
+        break;
+
+      case 'rejected':
+        icon.className = 'icon error';
+        iconSymbol.textContent = '✗';
+        title.textContent = 'Access Denied';
+        message.textContent = 'Your level access request has been rejected. If you believe this is an error, please contact the system administrator directly.';
+        details.style.display = 'block';
+        break;
+
+      case 'pending':
+        icon.className = 'icon pending';
+        iconSymbol.textContent = '⏱';
+        title.textContent = 'Request Submitted';
+        message.textContent = 'Your level access request has been submitted and is pending review. You will receive an email once a decision has been made.';
+        details.style.display = 'block';
+        break;
+
+      case 'error':
+      default:
+        icon.className = 'icon error';
+        iconSymbol.textContent = '✗';
+        title.textContent = 'Error Processing Request';
+        message.textContent = 'There was an error processing your level access request.';
+        details.style.display = 'block';
+        if (error) {
+          errorDetails.style.display = 'block';
+          document.getElementById('error-message').textContent = decodeURIComponent(error);
+        }
+        break;
+    }
+
+    // Log for debugging
+    console.log('Access Request Result:', {
+      status,
+      requestId,
+      email,
+      level,
+      error,
+      userAgent: navigator.userAgent,
+      timestamp: new Date().toISOString()
+    });
+  </script>
+</body>
+</html>
